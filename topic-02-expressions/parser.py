@@ -29,7 +29,8 @@ def parse_factor(tokens):
         return ast, tokens[1:]
     raise Exception(f"Unexpected token '{token['tag']}' at position {token['position']}.")
 
-def test_parse_factor():
+## ******* Homework Section *******
+def test_parse_factor(): 
     """
     factor = <number> | <identifier> | "(" expression ")"
     """
@@ -61,6 +62,7 @@ def parse_term(tokens):
 
     return node, tokens
 
+## ******* Homework Section *******
 def test_parse_term():
     """
     term = factor { "*"|"/" factor }
