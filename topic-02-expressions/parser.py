@@ -49,12 +49,20 @@ def test_parse_factor():
     tokens = tokenize("(2+3)")
     ast, tokens = parse_factor(tokens)
     assert ast == {'tag': '+', 'left': {'tag': 'number', 'value': 2}, 'right': {'tag': 'number', 'value': 3}}
+    assert tokens[0]['tag'] == None ## Ensures the expression is parsed correctly
 
-def parse_term(tokens):
+    ## Additional test case: Multiplication via parentheses
+    tokens = tokenize("(2*3)") ## verifies that parse_factor calls parse_expression for expressions within parentheses
+    ast, tokens = parse_factor(tokens)
+    assert ast == {'tag': '*', 'left': {'tag': 'number', 'value': 2}, 'right': {'tag': 'number', 'value': 3}}
+    print("AST for (2*3): ", ast)
+    assert tokens[0]['tag'] == None ## Ensures the expression is parsed correctly (Makes sure there are no remaining tokens)
+
+def parse_term(tokens): ## This function is built to handle single factors and chains of operations ##
     """
-    term = factor { "*"|"/" factor }
+    term = factor { "*"|"/" factor } 
     """
-    node, tokens = parse_factor(tokens)
+    node, tokens = parse_factor(tokens) 
     while tokens[0]["tag"] in ["*","/"]:
         tag = tokens[0]["tag"]
         right_node, tokens = parse_factor(tokens[1:])
@@ -68,17 +76,25 @@ def test_parse_term():
     term = factor { "*"|"/" factor }
     """
     print("testing parse_term()")
-    for s in ["1","22","333"]:
+    for s in ["1","22","333"]: ## Single factors
         tokens = tokenize(s)
         ast, tokens = parse_term(tokens)
         assert ast=={'tag': 'number', 'value': int(s)}
         assert tokens[0]['tag'] == None 
-    tokens = tokenize("2*4")
+    tokens = tokenize("2*4") ## Multiplication
     ast, tokens = parse_term(tokens)
     assert ast == {'tag': '*', 'left': {'tag': 'number', 'value': 2}, 'right': {'tag': 'number', 'value': 4}}
-    tokens = tokenize("2*4/6")
+    assert tokens[0]['tag'] == None
+    tokens = tokenize("2*4/6") ## Chain of operations
     ast, tokens = parse_term(tokens)
     assert ast == {'tag': '/', 'left': {'tag': '*', 'left': {'tag': 'number', 'value': 2}, 'right': {'tag': 'number', 'value': 4}}, 'right': {'tag': 'number', 'value': 6}}
+    assert tokens[0]['tag'] == None
+    ## Additional test case: Division via parentheses
+    tokens = tokenize("(4/2)*3")
+    ast, tokens = parse_term(tokens)
+    assert ast == {'tag': '*', 'left': {'tag': '/', 'left': {'tag': 'number', 'value': 4}, 'right': {'tag': 'number', 'value': 2}}, 'right': {'tag': 'number', 'value': 3}}
+    print("AST for (4/2)*3: ", ast)
+    assert tokens[0]['tag'] == None ## Ensures the expression is parsed correctly (Makes sure there are no remaining tokens)
 
 def parse_expression(tokens):
     """
